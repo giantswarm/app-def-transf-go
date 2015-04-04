@@ -31,13 +31,8 @@ func NewAppDefTransf(c Conf, d Deps) *AppDefTransf {
 }
 
 // TODO
-func (adt *AppDefTransf) V1toV2(appDefV1 userconfig.AppDefinition) userconfig.AppDefinitionV2 {
-	return userconfig.AppDefinitionV2{}
-}
-
-// TODO
-func (adt *AppDefTransf) V2toV1(appDefV2 userconfig.AppDefinition) userconfig.AppDefinition {
-	return userconfig.AppDefinition{}
+func (adt *AppDefTransf) V1toV2(appDefV1 userconfig.AppDefinition) userconfig.V2AppDefinition {
+	return userconfig.V2AppDefinition{}
 }
 
 type Metadata struct {
@@ -45,7 +40,7 @@ type Metadata struct {
 	Environment  string
 }
 
-func (adt *AppDefTransf) V2toInstanceGroups(metadata Metadata, nodes userconfig.AppDefinitionV2) ([]*instanceservice.InstanceGroup, error) {
+func (adt *AppDefTransf) V2toInstanceGroups(metadata Metadata, nodes userconfig.V2AppDefinition) ([]*instanceservice.InstanceGroup, error) {
 	// find scaling nodes
 	scalingNodes := []userconfig.Node{}
 	for _, node := range nodes {
