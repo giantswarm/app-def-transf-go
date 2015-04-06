@@ -9,7 +9,7 @@ PROJECT_PATH := $(BUILD_PATH)/src/github.com/giantswarm
 
 BIN := $(PROJECT)
 
-.PHONY: clean run-test deps get-deps update-deps fmt run-tests upload-docker-image
+.PHONY: clean deps get-deps fmt run-tests
 
 GOPATH := $(BUILD_PATH)
 
