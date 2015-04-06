@@ -2,6 +2,7 @@ package appdeftransf
 
 import (
 	"path/filepath"
+	"strings"
 
 	"github.com/giantswarm/app-service/service/instance-service"
 	"github.com/giantswarm/user-config"
@@ -57,16 +58,19 @@ func (adt *AppDefTransf) V2toInstanceGroups(metadata Metadata, nodes userconfig.
 		}
 
 		// find desired scale by user defined scaling nodes
-		scale := userconfig.ScalingPolicyConfig{}
+		scale := 0
 		for _, scalingNode := range scalingNodes {
-			if scalingNode.Name.String() == node.Name.String() {
-				scale = scalingNode.Scale
-				break
+			if strings.HasPrefix(node.Name.String(), scalingNode.Name.String()) {
+				scale += scalingNode.Scale.MinScale()
 			}
 		}
 
+		if scale == 0 {
+			scale = 1
+		}
+
 		// apply scale
-		for i := 0; i < scale.MinScale(); i++ {
+		for i := 0; i < scale; i++ {
 			cfg, err := adt.createInstanceConfig(metadata, node, nodes)
 			if err != nil {
 				return nil, errgo.Mask(err)
@@ -156,7 +160,7 @@ func (adt *AppDefTransf) nodeLinksToInstanceDependencies(metadata Metadata, node
 		}
 
 		newDep := instanceservice.Dependency{
-			Context: context(metadata, node),
+			Context: context(metadata, depNode),
 			Name:    name,
 			Port:    link.Port,
 		}

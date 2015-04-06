@@ -1,4 +1,4 @@
-PROJECT=app-definition-transformer
+PROJECT=app-def-transf-go
 ifndef registry
 registry=registry.giantswarm.io
 endif
