@@ -5,7 +5,6 @@ import (
 
 	"github.com/giantswarm/user-config"
 	"github.com/juju/errgo"
-	"github.com/op/go-logging"
 )
 
 const (
