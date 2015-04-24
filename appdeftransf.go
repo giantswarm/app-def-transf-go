@@ -12,33 +12,13 @@ const (
 	DefTypeV1GiantSwarm = "V1GiantSwarm"
 )
 
-type Conf struct{}
-
-type Deps struct {
-	Logger *logging.Logger
-}
-
-// AppDefTransf stands for App-Definition-Transformer and is responsible for
-// transforming data structures to other data structures.
-type AppDefTransf struct {
-	Conf
-	Deps
-}
-
-func NewAppDefTransf(c Conf, d Deps) *AppDefTransf {
-	return &AppDefTransf{
-		Conf: c,
-		Deps: d,
-	}
-}
-
-func (adt *AppDefTransf) ParseDefAndType(i interface{}) ([]byte, string, error) {
+func ParseDefAndType(i interface{}) ([]byte, string, error) {
 	b, err := json.Marshal(i)
 	if err != nil {
 		return nil, "", Mask(err)
 	}
 
-	t, err := adt.ParseTypeFromBytes(b)
+	t, err := ParseTypeFromBytes(b)
 	if err != nil {
 		return nil, "", Mask(err)
 	}
@@ -46,7 +26,7 @@ func (adt *AppDefTransf) ParseDefAndType(i interface{}) ([]byte, string, error) 
 	return b, t, nil
 }
 
-func (adt *AppDefTransf) ParseTypeFromBytes(b []byte) (string, error) {
+func ParseTypeFromBytes(b []byte) (string, error) {
 	if _, err := userconfig.ParseV1AppDefinition(b); err == nil {
 		return "V1GS", nil
 	}
@@ -54,8 +34,8 @@ func (adt *AppDefTransf) ParseTypeFromBytes(b []byte) (string, error) {
 	return "", errgo.Newf("Invalid app definition.")
 }
 
-func (adt *AppDefTransf) ParseName(i interface{}) (string, error) {
-	b, t, err := adt.ParseDefAndType(i)
+func ParseName(i interface{}) (string, error) {
+	b, t, err := ParseDefAndType(i)
 	if err != nil {
 		return "", Mask(err)
 	}
