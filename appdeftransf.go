@@ -26,7 +26,7 @@ func ParseTypeFromBytes(b []byte) (DefType, error) {
 func ParseName(b []byte) (string, error) {
 	t, err := ParseTypeFromBytes(b)
 	if err != nil {
-		return "", Mask(err)
+		return "", mask(err)
 	}
 
 	switch t {
