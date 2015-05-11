@@ -11,20 +11,6 @@ const (
 	DefTypeV1GiantSwarm = "V1GiantSwarm"
 )
 
-func ParseDefAndType(i interface{}) ([]byte, string, error) {
-	b, err := json.Marshal(i)
-	if err != nil {
-		return nil, "", Mask(err)
-	}
-
-	t, err := ParseTypeFromBytes(b)
-	if err != nil {
-		return nil, "", Mask(err)
-	}
-
-	return b, t, nil
-}
-
 func ParseTypeFromBytes(b []byte) (string, error) {
 	if _, err := userconfig.ParseV1AppDefinition(b); err == nil {
 		return "V1GS", nil
@@ -33,8 +19,8 @@ func ParseTypeFromBytes(b []byte) (string, error) {
 	return "", errgo.Newf("Invalid app definition.")
 }
 
-func ParseName(i interface{}) (string, error) {
-	b, t, err := ParseDefAndType(i)
+func ParseName(b []byte) (string, error) {
+	t, err := ParseTypeFromBytes(b)
 	if err != nil {
 		return "", Mask(err)
 	}
