@@ -1,8 +1,6 @@
 package appdeftransf
 
 import (
-	"encoding/json"
-
 	"github.com/giantswarm/user-config"
 	"github.com/juju/errgo"
 )
