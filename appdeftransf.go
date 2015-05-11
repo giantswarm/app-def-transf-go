@@ -11,7 +11,7 @@ const (
 
 func ParseTypeFromBytes(b []byte) (string, error) {
 	if _, err := userconfig.ParseV1AppDefinition(b); err == nil {
-		return "V1GS", nil
+		return DefTypeV1GiantSwarm, nil
 	}
 
 	return "", errgo.Newf("Invalid app definition.")
