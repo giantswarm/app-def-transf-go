@@ -5,11 +5,17 @@ import (
 	"github.com/juju/errgo"
 )
 
+type DefType string
+
+func (dt DefType) IsV1GiantSwarm() bool {
+	return dt == DefTypeV1GiantSwarm
+}
+
 const (
-	DefTypeV1GiantSwarm = "V1GiantSwarm"
+	DefTypeV1GiantSwarm DefType = "V1GiantSwarm"
 )
 
-func ParseTypeFromBytes(b []byte) (string, error) {
+func ParseTypeFromBytes(b []byte) (DefType, error) {
 	if _, err := userconfig.ParseV1AppDefinition(b); err == nil {
 		return DefTypeV1GiantSwarm, nil
 	}
