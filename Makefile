@@ -64,7 +64,7 @@ $(BIN): VERSION $(SOURCE)
 	    -e GOOS=$(GOOS) \
 	    -e GOARCH=$(GOARCH) \
 	    -w /usr/code \
-	    golang:1.3.1-cross \
+	    golang:1.4.2-cross \
 	    go build -a -ldflags "-X main.projectVersion $(VERSION) -X main.projectBuild $(COMMIT)" -o $(BIN)
 
 run-tests:
