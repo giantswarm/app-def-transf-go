@@ -43,9 +43,12 @@ func ParseName(b []byte) (string, error) {
 
 	switch t {
 	case DefTypeV1GiantSwarm:
-		if def, err := userconfig.ParseV1AppDefinition(b); err == nil {
-			return def.AppName, nil
+		def, err := userconfig.ParseV1AppDefinition(b)
+		if err != nil {
+			return "", mask(err)
 		}
+
+		return def.AppName, nil
 	}
 
 	return "", errgo.Newf("Invalid app definition type '%s'. Expecting %s. Aborting...", t, DefTypeV1GiantSwarm)
