@@ -7,20 +7,32 @@ import (
 
 type DefType string
 
-func (dt DefType) IsV1GiantSwarm() bool {
-	return dt == DefTypeV1GiantSwarm
-}
-
 const (
 	DefTypeV1GiantSwarm DefType = "V1GiantSwarm"
 )
 
 func ParseTypeFromBytes(b []byte) (DefType, error) {
-	if _, err := userconfig.ParseV1AppDefinition(b); err == nil {
-		return DefTypeV1GiantSwarm, nil
+	dtCheckers := []defTypeChecker{
+		newV1GiantSwarmDefTypeChecker(),
 	}
 
-	return "", errgo.Newf("Invalid app definition.")
+	var finType DefType = ""
+	var finProb float64 = 0.0
+
+	for _, dtChecker := range dtCheckers {
+		dtCheckerType, dtCheckerProb := dtChecker.Parse(b)
+
+		if dtCheckerProb > finProb {
+			finProb = dtCheckerProb
+			finType = dtCheckerType
+		}
+	}
+
+	if finProb == 0.0 {
+		return "", invalidDefTypeErr
+	}
+
+	return finType, nil
 }
 
 func ParseName(b []byte) (string, error) {
