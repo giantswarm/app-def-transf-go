@@ -15,13 +15,13 @@ type simpleV1GiantSwarmComponent struct {
 }
 
 type simpleV1GiantSwarmService struct {
-	ServiceName string `json:"service_name"`
-	Components  []simpleV1GiantSwarmComponent
+	ServiceName string                        `json:"service_name"`
+	Components  []simpleV1GiantSwarmComponent `json:"components"`
 }
 
 type simpleV1GiantSwarmAppDef struct {
-	AppName  string `json:"app_name"`
-	Services []simpleV1GiantSwarmService
+	AppName  string                      `json:"app_name"`
+	Services []simpleV1GiantSwarmService `json:"services"`
 }
 
 // def type checker
