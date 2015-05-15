@@ -29,7 +29,7 @@ func ParseTypeFromBytes(b []byte) (DefType, error) {
 	}
 
 	if finProb == 0.0 {
-		return "", invalidDefTypeErr
+		return "", mask(invalidDefTypeErr)
 	}
 
 	return finType, nil
