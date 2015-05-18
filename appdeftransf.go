@@ -5,12 +5,16 @@ import (
 	"github.com/juju/errgo"
 )
 
+// DefType is the app definition type an app can have.
 type DefType string
 
 const (
 	DefTypeV1GiantSwarm DefType = "V1GiantSwarm"
 )
 
+// ParseTypeFromBytes tries to find out what kind of app definition is given by
+// b. If no proper type can be detected, it returns an error. Valid definition
+// types are: DefTypeV1GiantSwarm.
 func ParseTypeFromBytes(b []byte) (DefType, error) {
 	dtCheckers := []defTypeChecker{
 		newV1GiantSwarmDefTypeChecker(),
@@ -35,6 +39,8 @@ func ParseTypeFromBytes(b []byte) (DefType, error) {
 	return finType, nil
 }
 
+// ParseName tries to find out what name an app given by b might has.
+// Internally it calls ParseTypeFromBytes.
 func ParseName(b []byte) (string, error) {
 	t, err := ParseTypeFromBytes(b)
 	if err != nil {
