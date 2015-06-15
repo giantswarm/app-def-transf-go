@@ -294,7 +294,7 @@ var _ = Describe("AppDefTransf", func() {
 				})
 
 				It("should parse name", func() {
-					Expect(n).To(Equal("a0c1b9f4"))
+					Expect(n).To(Equal("63c100fb"))
 				})
 			})
 		})
