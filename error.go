@@ -9,3 +9,7 @@ var (
 
 	mask = errgo.MaskFunc(errgo.Any)
 )
+
+func isInvalidDefType(err error) bool {
+	return errgo.Cause(err) == invalidDefTypeErr
+}
