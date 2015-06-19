@@ -68,7 +68,7 @@ func (dtc v1GiantSwarmDefTypeChecker) Parse(b []byte) (DefType, float64) {
 	// sure and just assume the probability that we are right or wrong with our
 	// guess is 50%.
 	_, err = userconfig.ParseV1AppDefinition(b)
-	if userconfig.IsSyntaxError(err) && strings.Contains(errgo.Cause(err).Error(), "$") {
+	if userconfig.IsSyntax(err) && strings.Contains(errgo.Cause(err).Error(), "$") {
 		prob += 50.0
 		return DefTypeV1GiantSwarm, prob
 	}
