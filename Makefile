@@ -43,8 +43,8 @@ deps:
 
 	#
 	# Fetch private packages first (so `go get` skips them later)
-	@builder get dep -b v2-app-def git@github.com:giantswarm/user-config.git $(PROJECT_PATH)/user-config
-	@builder get dep git@github.com:giantswarm/docker-types-go.git $(PROJECT_PATH)/docker-types-go
+	@builder get dep -b 0.15.2 git@github.com:giantswarm/user-config.git $(PROJECT_PATH)/user-config
+	@builder get dep git@github.com:giantswarm/generic-types-go.git $(PROJECT_PATH)/generic-types-go
 
 	#
 	# Fetch public dependencies via `go get`
