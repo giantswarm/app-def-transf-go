@@ -30,7 +30,7 @@ var _ = Describe("AppDefTransf", func() {
 
 			It("should throw error", func() {
 				Expect(err).NotTo(BeNil())
-				Expect(isInvalidDefType(err)).To(BeTrue())
+				Expect(IsInvalidDefType(err)).To(BeTrue())
 			})
 
 			It("should not parse def type DefTypeV1GiantSwarm", func() {
@@ -302,15 +302,15 @@ var _ = Describe("AppDefTransf", func() {
 		Describe("invalid type", func() {
 			BeforeEach(func() {
 				b := []byte(`{
-						"foo": "bar"
-					}`)
+					"foo": "bar"
+				}`)
 
 				n, err = ParseName(b)
 			})
 
 			It("should throw error", func() {
 				Expect(err).NotTo(BeNil())
-				Expect(isInvalidDefType(err)).To(BeTrue())
+				Expect(IsInvalidDefType(err)).To(BeTrue())
 			})
 
 			It("should NOT parse name", func() {
