@@ -35,7 +35,7 @@ func ParseTypeFromBytes(b []byte) (DefType, error) {
 	}
 
 	if finProb == 0.0 {
-		return "", mask(InvalidDefTypeErr)
+		return "", mask(errgo.WithCausef(nil, InvalidDefTypeErr, "expecting %s or %s", DefTypeV1GiantSwarm, DefTypeV2GiantSwarm))
 	}
 
 	return finType, nil
@@ -66,5 +66,5 @@ func ParseName(b []byte) (string, error) {
 		return appName, nil
 	}
 
-	return "", errgo.Newf("cannot parse app definition, expecting: %s, %s", DefTypeV1GiantSwarm, DefTypeV2GiantSwarm)
+	return "", mask(errgo.WithCausef(nil, InvalidDefTypeErr, "expecting %s or %s", DefTypeV1GiantSwarm, DefTypeV2GiantSwarm))
 }

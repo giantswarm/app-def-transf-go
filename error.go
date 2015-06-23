@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	InvalidDefTypeErr = errgo.Newf("Invalid definition type.")
+	InvalidDefTypeErr = errgo.Newf("invalid definition type")
 
 	mask = errgo.MaskFunc(errgo.Any)
 )
