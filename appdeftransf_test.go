@@ -33,7 +33,7 @@ var _ = Describe("AppDefTransf", func() {
 				Expect(IsInvalidDefType(err)).To(BeTrue())
 			})
 
-			It("should not parse def type DefTypeV1GiantSwarm", func() {
+			It("should not parse to any known type", func() {
 				Expect(t).To(Equal(DefType("")))
 			})
 		})
