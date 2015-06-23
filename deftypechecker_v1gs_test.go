@@ -22,16 +22,16 @@ var _ = Describe("v1GiantSwarmDefTypeChecker", func() {
 		Describe("valid definition", func() {
 			BeforeEach(func() {
 				b := []byte(`{
-          "app_name": "an",
-          "services": [
-            {
-              "service_name": "sn",
-              "components": [
-                { "component_name": "cn" }
-              ]
-            }
-          ]
-        }`)
+					"app_name": "an",
+					"services": [
+						{
+							"service_name": "sn",
+							"components": [
+								{ "component_name": "cn" }
+							]
+						}
+					]
+				}`)
 
 				t, prob = dtc.Parse(b)
 			})
@@ -48,8 +48,8 @@ var _ = Describe("v1GiantSwarmDefTypeChecker", func() {
 		Describe("invalid definition", func() {
 			BeforeEach(func() {
 				b := []byte(`{
-          "foo": "bar"
-        }`)
+					"foo": "bar"
+				}`)
 
 				t, prob = dtc.Parse(b)
 			})
@@ -67,16 +67,16 @@ var _ = Describe("v1GiantSwarmDefTypeChecker", func() {
 			BeforeEach(func() {
 				// wrong keys are "Component_name" and "appname"
 				b := []byte(`{
-          "appname": "an",
-          "services": [
-            {
-              "service_name": "sn",
-              "components": [
-                { "Component_name": "cn" }
-              ]
-            }
-          ]
-        }`)
+					"appname": "an",
+					"services": [
+						{
+							"service_name": "sn",
+							"components": [
+								{ "Component_name": "cn" }
+							]
+						}
+					]
+				}`)
 
 				t, prob = dtc.Parse(b)
 			})
@@ -94,16 +94,16 @@ var _ = Describe("v1GiantSwarmDefTypeChecker", func() {
 			BeforeEach(func() {
 				// the first comma (,) is missing
 				b := []byte(`{
-          "appname": "an"
-          "services": [
-            {
-              "service_name": "sn",
-              "components": [
-                { "Component_name": "cn" }
-              ]
-            }
-          ]
-        }`)
+					"appname": "an"
+					"services": [
+						{
+							"service_name": "sn",
+							"components": [
+								{ "Component_name": "cn" }
+							]
+						}
+					]
+				}`)
 
 				t, prob = dtc.Parse(b)
 			})
@@ -112,24 +112,24 @@ var _ = Describe("v1GiantSwarmDefTypeChecker", func() {
 				Expect(t).To(Equal(DefTypeV1GiantSwarm))
 			})
 
-			It("should parse probability of 0", func() {
-				Expect(prob).To(Equal(float64(0)))
+			It("should parse probability of 10", func() {
+				Expect(prob).To(Equal(float64(10)))
 			})
 		})
 
 		Describe("unparsed variables", func() {
 			BeforeEach(func() {
 				b := []byte(`{
-          "app_name": "an",
-          "services": [
-            {
-              "service_name": $serviceName,
-              "components": [
-                { "component_name": "cn" }
-              ]
-            }
-          ]
-        }`)
+					"app_name": "an",
+					"services": [
+						{
+							"service_name": $serviceName,
+							"components": [
+								{ "component_name": "cn" }
+							]
+						}
+					]
+				}`)
 
 				t, prob = dtc.Parse(b)
 			})
@@ -138,8 +138,8 @@ var _ = Describe("v1GiantSwarmDefTypeChecker", func() {
 				Expect(t).To(Equal(DefTypeV1GiantSwarm))
 			})
 
-			It("should parse probability of 50", func() {
-				Expect(prob).To(Equal(float64(50)))
+			It("should parse probability of 60", func() {
+				Expect(prob).To(Equal(float64(60)))
 			})
 		})
 	})

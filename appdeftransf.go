@@ -10,6 +10,7 @@ type DefType string
 
 const (
 	DefTypeV1GiantSwarm DefType = "V1GiantSwarm"
+	DefTypeV2GiantSwarm DefType = "V2GiantSwarm"
 )
 
 // ParseTypeFromBytes tries to find out what kind of app definition is given by
@@ -18,6 +19,7 @@ const (
 func ParseTypeFromBytes(b []byte) (DefType, error) {
 	dtCheckers := []defTypeChecker{
 		newV1GiantSwarmDefTypeChecker(),
+		newV2GiantSwarmDefTypeChecker(),
 	}
 
 	var finType DefType = ""
@@ -33,7 +35,7 @@ func ParseTypeFromBytes(b []byte) (DefType, error) {
 	}
 
 	if finProb == 0.0 {
-		return "", mask(invalidDefTypeErr)
+		return "", mask(errgo.WithCausef(nil, InvalidDefTypeErr, "expecting %s or %s", DefTypeV1GiantSwarm, DefTypeV2GiantSwarm))
 	}
 
 	return finType, nil
@@ -55,7 +57,14 @@ func ParseName(b []byte) (string, error) {
 		}
 
 		return def.AppName, nil
+	case DefTypeV2GiantSwarm:
+		appName, err := userconfig.V2GenerateAppName(b)
+		if err != nil {
+			return "", mask(err)
+		}
+
+		return appName, nil
 	}
 
-	return "", errgo.Newf("Invalid app definition type '%s'. Expecting %s. Aborting...", t, DefTypeV1GiantSwarm)
+	return "", mask(errgo.WithCausef(nil, InvalidDefTypeErr, "expecting %s or %s", DefTypeV1GiantSwarm, DefTypeV2GiantSwarm))
 }

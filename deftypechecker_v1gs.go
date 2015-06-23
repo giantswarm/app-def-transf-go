@@ -2,6 +2,8 @@ package appdeftransf
 
 import (
 	"encoding/json"
+	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/giantswarm/user-config"
@@ -47,19 +49,34 @@ func newV1GiantSwarmDefTypeChecker() defTypeChecker {
 }
 
 func (dtc v1GiantSwarmDefTypeChecker) Parse(b []byte) (DefType, float64) {
+	prob := 0.0
+
+	// On syntax errors we need to check the raw definition. In case we find
+	// important keywords we just assume to have a higher probability to deal
+	// with a v1 app def.
+	match, err := regexp.Match(`"services"(\s+)?:`, b)
+	if err != nil {
+		fmt.Printf("%#v\n", errgo.New("cannot parse v1 app definition: regexp.Match failed badly"))
+		return DefTypeV1GiantSwarm, 0.0
+	} else if match {
+		prob += 10.0
+	}
+
 	// In case we have a syntax error which message contains a dollar char ($),
 	// we guess the current definition is a swarm.json, and has unoarsed
 	// variables in it. Because this is only one indicator, we cannot be more
 	// sure and just assume the probability that we are right or wrong with our
 	// guess is 50%.
-	_, err := userconfig.ParseV1AppDefinition(b)
+	_, err = userconfig.ParseV1AppDefinition(b)
 	if userconfig.IsSyntax(err) && strings.Contains(errgo.Cause(err).Error(), "$") {
-		return DefTypeV1GiantSwarm, 50.0
+		prob += 50.0
+		return DefTypeV1GiantSwarm, prob
 	}
 
 	var simpleDef simpleV1GiantSwarmAppDef
 	if err := json.Unmarshal(b, &simpleDef); err != nil {
-		return DefTypeV1GiantSwarm, 0.0
+		fmt.Printf("%#v\n", errgo.New("cannot parse v1 app definition: json.Unmarshal failed badly"))
+		return DefTypeV1GiantSwarm, prob
 	}
 
 	passed := 0
