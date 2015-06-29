@@ -3,7 +3,39 @@ package appdeftransf
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"testing"
+
+	"github.com/giantswarm/generic-types-go"
+	"github.com/giantswarm/user-config"
 )
+
+func TestMigrateV1ToV2(t *testing.T) {
+	v1AppDef := userconfig.AppDefinition{
+		AppName: "app_name",
+		Services: []userconfig.ServiceConfig{
+			userconfig.ServiceConfig{
+				ServiceName: "service_name",
+				Components: []userconfig.ComponentConfig{
+					userconfig.ComponentConfig{
+						ComponentName: "component_name",
+						InstanceConfig: userconfig.InstanceConfig{
+							Image: generictypes.MustParseDockerImage("image"),
+						},
+					},
+				},
+			},
+		},
+	}
+
+	v2AppDef, err := V1GiantSwarmToV2GiantSwarm(v1AppDef)
+	if err != nil {
+		t.Fatalf("V1GiantSwarmToV2GiantSwarm failed: %#v", err)
+	}
+
+	if err := v2AppDef.Validate(nil); err != nil {
+		t.Fatalf("v2AppDef.Validate failed: %#v", err)
+	}
+}
 
 var _ = Describe("AppDefTransf", func() {
 	var (
