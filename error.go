@@ -7,7 +7,7 @@ import (
 var (
 	InvalidDefTypeErr = errgo.Newf("invalid definition type")
 
-	mask = errgo.MaskFunc(errgo.Any)
+	maskAny = errgo.MaskFunc(errgo.Any)
 )
 
 func IsInvalidDefType(err error) bool {
