@@ -37,6 +37,46 @@ func TestMigrateV1ToV2(t *testing.T) {
 	}
 }
 
+func TestMigratePodsV1ToV2(t *testing.T) {
+	v1AppDef := userconfig.AppDefinition{
+		AppName: "app_name",
+		Services: []userconfig.ServiceConfig{
+			userconfig.ServiceConfig{
+				ServiceName: "service_name",
+				Components: []userconfig.ComponentConfig{
+					userconfig.ComponentConfig{
+						ComponentName: "component_name1",
+						InstanceConfig: userconfig.InstanceConfig{
+							Image: generictypes.MustParseDockerImage("image"),
+						},
+						PodConfig: userconfig.PodConfig{
+							PodName: "pod1",
+						},
+					},
+					userconfig.ComponentConfig{
+						ComponentName: "component_name2",
+						InstanceConfig: userconfig.InstanceConfig{
+							Image: generictypes.MustParseDockerImage("image"),
+						},
+						PodConfig: userconfig.PodConfig{
+							PodName: "pod1",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	v2AppDef, err := V1GiantSwarmToV2GiantSwarm(v1AppDef)
+	if err != nil {
+		t.Fatalf("V1GiantSwarmToV2GiantSwarm failed: %#v", err)
+	}
+
+	if err := v2AppDef.Validate(nil); err != nil {
+		t.Fatalf("v2AppDef.Validate failed: %#v", err)
+	}
+}
+
 var _ = Describe("AppDefTransf", func() {
 	var (
 		err error

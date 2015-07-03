@@ -76,9 +76,50 @@ func V1GiantSwarmToV2GiantSwarm(v1AppDef userconfig.AppDefinition) (userconfig.V
 		"nodes": map[string]interface{}{},
 	}
 
+	nameKey := func(serviceName, componentName string) string {
+		return serviceName + "/" + componentName
+	}
+
+	// Create node names for each component
+	nodeNameMap := make(map[string]string)
 	for _, service := range v1AppDef.Services {
 		for _, component := range service.Components {
-			nodeName := service.ServiceName + "/" + component.ComponentName
+			var nodeName string
+			if component.PodName != "" {
+				nodeName = service.ServiceName + "/" + component.PodName + "/" + component.ComponentName
+			} else {
+				nodeName = service.ServiceName + "/" + component.ComponentName
+			}
+			key := nameKey(service.ServiceName, component.ComponentName)
+			nodeNameMap[key] = nodeName
+		}
+	}
+
+	// Create nodes for all components
+	podsCreated := make(map[string]string)
+	for _, service := range v1AppDef.Services {
+		for _, component := range service.Components {
+			key := nameKey(service.ServiceName, component.ComponentName)
+			nodeName := nodeNameMap[key]
+
+			// Create pod node if needed
+			if component.PodName != "" {
+				podNodeName := service.ServiceName + "/" + component.PodName
+				if _, ok := podsCreated[podNodeName]; !ok {
+					// Need to create pod node
+					podNode := map[string]interface{}{}
+					podNode["pod"] = "children"
+
+					// Add pod node
+					genericNodes["nodes"][podNodeName] = podNode
+
+					// Record that we created this node so we don't duplicate t
+					podsCreated[podNodeName] = podNodeName
+				}
+
+				// Remove the podname so it will not be part of the v2 def
+				component.PodName = ""
+			}
 
 			rawComponent, err := json.Marshal(component)
 			if err != nil {
@@ -101,7 +142,7 @@ func V1GiantSwarmToV2GiantSwarm(v1AppDef userconfig.AppDefinition) (userconfig.V
 						for i, rawDep := range rawDeps {
 							if m, ok := rawDep.(map[string]interface{}); ok {
 								serviceName, componentName := userconfig.ParseDependency(service.ServiceName, m["name"].(string))
-								m["name"] = serviceName + "/" + componentName
+								m["name"] = nodeNameMap[nameKey(serviceName, componentName)]
 								rawDeps[i] = m
 							}
 						}

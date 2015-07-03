@@ -75,7 +75,7 @@ func (dtc v1GiantSwarmDefTypeChecker) Parse(b []byte) (DefType, float64) {
 
 	var simpleDef simpleV1GiantSwarmAppDef
 	if err := json.Unmarshal(b, &simpleDef); err != nil {
-		fmt.Printf("%#v\n", errgo.New("cannot parse v1 app definition: json.Unmarshal failed badly"))
+		fmt.Printf("%#v\n", errgo.Newf("cannot parse v1 app definition: json.Unmarshal failed badly %v", err))
 		return DefTypeV1GiantSwarm, prob
 	}
 
