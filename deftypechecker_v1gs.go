@@ -2,7 +2,6 @@ package appdeftransf
 
 import (
 	"encoding/json"
-	"fmt"
 	"regexp"
 	"strings"
 
@@ -56,7 +55,6 @@ func (dtc v1GiantSwarmDefTypeChecker) Parse(b []byte) (DefType, float64) {
 	// with a v1 app def.
 	match, err := regexp.Match(`"services"(\s+)?:`, b)
 	if err != nil {
-		fmt.Printf("%#v\n", errgo.New("cannot parse v1 app definition: regexp.Match failed badly"))
 		return DefTypeV1GiantSwarm, 0.0
 	} else if match {
 		prob += 10.0
@@ -75,7 +73,6 @@ func (dtc v1GiantSwarmDefTypeChecker) Parse(b []byte) (DefType, float64) {
 
 	var simpleDef simpleV1GiantSwarmAppDef
 	if err := json.Unmarshal(b, &simpleDef); err != nil {
-		fmt.Printf("%#v\n", errgo.Newf("cannot parse v1 app definition: json.Unmarshal failed badly %v", err))
 		return DefTypeV1GiantSwarm, prob
 	}
 
