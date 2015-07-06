@@ -154,6 +154,29 @@ func V1GiantSwarmToV2GiantSwarm(v1AppDef userconfig.AppDefinition) (userconfig.V
 					continue
 				}
 
+				if key == "volumes" {
+					if rawVols, ok := val.([]interface{}); ok {
+						for i, rawVol := range rawVols {
+							if m, ok := rawVol.(map[string]interface{}); ok {
+								if volumeFromRaw, ok := m["volume_from"]; ok {
+									serviceName, componentName := userconfig.ParseDependency(service.ServiceName, volumeFromRaw.(string))
+									m["volume_from"] = nodeNameMap[nameKey(serviceName, componentName)]
+								}
+								if volumesFromRaw, ok := m["volumes_from"]; ok {
+									serviceName, componentName := userconfig.ParseDependency(service.ServiceName, volumesFromRaw.(string))
+									m["volumes_from"] = nodeNameMap[nameKey(serviceName, componentName)]
+								}
+								rawVols[i] = m
+							}
+						}
+
+						val = rawVols
+					}
+
+					genericNode["volumes"] = val
+					continue
+				}
+
 				if key == "scaling_policy" {
 					genericNode["scale"] = val
 					continue
