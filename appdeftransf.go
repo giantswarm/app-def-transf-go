@@ -158,13 +158,13 @@ func V1GiantSwarmToV2GiantSwarm(v1AppDef userconfig.AppDefinition) (userconfig.V
 					if rawVols, ok := val.([]interface{}); ok {
 						for i, rawVol := range rawVols {
 							if m, ok := rawVol.(map[string]interface{}); ok {
-								if volumeFromRaw, ok := m["volume_from"]; ok {
+								if volumeFromRaw, ok := m["volume-from"]; ok {
 									serviceName, componentName := userconfig.ParseDependency(service.ServiceName, volumeFromRaw.(string))
-									m["volume_from"] = nodeNameMap[nameKey(serviceName, componentName)]
+									m["volume-from"] = nodeNameMap[nameKey(serviceName, componentName)]
 								}
-								if volumesFromRaw, ok := m["volumes_from"]; ok {
+								if volumesFromRaw, ok := m["volumes-from"]; ok {
 									serviceName, componentName := userconfig.ParseDependency(service.ServiceName, volumesFromRaw.(string))
-									m["volumes_from"] = nodeNameMap[nameKey(serviceName, componentName)]
+									m["volumes-from"] = nodeNameMap[nameKey(serviceName, componentName)]
 								}
 								rawVols[i] = m
 							}
