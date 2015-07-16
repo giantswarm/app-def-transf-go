@@ -60,7 +60,7 @@ func ParseName(b []byte) (string, error) {
 
 		return def.AppName, nil
 	case DefTypeV2GiantSwarm:
-		appName, err := userconfig.V2GenerateAppName(b)
+		appName, err := userconfig.V2AppName(b)
 		if err != nil {
 			return "", maskAny(err)
 		}
