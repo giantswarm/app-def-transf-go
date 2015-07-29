@@ -20,7 +20,8 @@ type simpleV2GiantSwarmNodeDef struct {
 }
 
 type simpleV2GiantSwarmAppDef struct {
-	Nodes map[string]simpleV2GiantSwarmNodeDef `json:"nodes"`
+	ServiceName string                               `json:"name,omitempty"`
+	Nodes       map[string]simpleV2GiantSwarmNodeDef `json:"nodes"`
 }
 
 // def type checker
@@ -35,10 +36,11 @@ func newV2GiantSwarmDefTypeChecker() defTypeChecker {
 	checker := v2GiantSwarmDefTypeChecker{}
 
 	checker.checks = []v2GiantSwarmCheck{
+		checker.hasServiceName,
 		checker.hasNodes,
 		checker.hasNodeName,
-		checker.hasServiceImage,
-		checker.hasServicePorts,
+		checker.hasComponentImage,
+		checker.hasComponentPorts,
 		checker.hasNodeExpose,
 		checker.hasNodeScale,
 	}
@@ -64,7 +66,7 @@ func (dtc v2GiantSwarmDefTypeChecker) Parse(b []byte) (DefType, float64) {
 	// variables in it. Because this is only one indicator, we cannot be more
 	// sure and just assume the probability that we are right or wrong with our
 	// guess is 50%.
-	_, err = userconfig.ParseV2AppDefinition(b)
+	_, err = userconfig.ParseV2ServiceDefinition(b)
 	if userconfig.IsSyntax(err) && strings.Contains(errgo.Cause(err).Error(), "$") {
 		prob += 50.0
 		return DefTypeV2GiantSwarm, prob
@@ -87,6 +89,10 @@ func (dtc v2GiantSwarmDefTypeChecker) Parse(b []byte) (DefType, float64) {
 
 // private checker
 
+func (dtc v2GiantSwarmDefTypeChecker) hasServiceName(simpleDef simpleV2GiantSwarmAppDef) bool {
+	return simpleDef.ServiceName != ""
+}
+
 func (dtc v2GiantSwarmDefTypeChecker) hasNodes(simpleDef simpleV2GiantSwarmAppDef) bool {
 	return len(simpleDef.Nodes) > 0
 }
@@ -97,13 +103,13 @@ func (dtc v2GiantSwarmDefTypeChecker) hasNodeName(simpleDef simpleV2GiantSwarmAp
 	})
 }
 
-func (dtc v2GiantSwarmDefTypeChecker) hasServiceImage(simpleDef simpleV2GiantSwarmAppDef) bool {
+func (dtc v2GiantSwarmDefTypeChecker) hasComponentImage(simpleDef simpleV2GiantSwarmAppDef) bool {
 	return dtc.iterateNodes(simpleDef, func(name string, node simpleV2GiantSwarmNodeDef) bool {
 		return node.Image != ""
 	})
 }
 
-func (dtc v2GiantSwarmDefTypeChecker) hasServicePorts(simpleDef simpleV2GiantSwarmAppDef) bool {
+func (dtc v2GiantSwarmDefTypeChecker) hasComponentPorts(simpleDef simpleV2GiantSwarmAppDef) bool {
 	return dtc.iterateNodes(simpleDef, func(name string, node simpleV2GiantSwarmNodeDef) bool {
 		return len(node.Ports) > 0
 	})

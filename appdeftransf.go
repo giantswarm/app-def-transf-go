@@ -60,7 +60,7 @@ func ParseName(b []byte) (string, error) {
 
 		return def.AppName, nil
 	case DefTypeV2GiantSwarm:
-		appName, err := userconfig.V2AppName(b)
+		appName, err := userconfig.V2ServiceName(b)
 		if err != nil {
 			return "", maskAny(err)
 		}
@@ -71,7 +71,7 @@ func ParseName(b []byte) (string, error) {
 	return "", maskAny(errgo.WithCausef(nil, InvalidDefTypeErr, "expecting %s or %s", DefTypeV1GiantSwarm, DefTypeV2GiantSwarm))
 }
 
-func V1GiantSwarmToV2GiantSwarm(v1AppDef userconfig.AppDefinition) (userconfig.V2AppDefinition, error) {
+func V1GiantSwarmToV2GiantSwarm(v1AppDef userconfig.AppDefinition) (userconfig.V2ServiceDefinition, error) {
 	genericNodes := map[string]map[string]interface{}{
 		"nodes": map[string]interface{}{},
 	}
@@ -123,12 +123,12 @@ func V1GiantSwarmToV2GiantSwarm(v1AppDef userconfig.AppDefinition) (userconfig.V
 
 			rawComponent, err := json.Marshal(component)
 			if err != nil {
-				return userconfig.V2AppDefinition{}, maskAny(err)
+				return userconfig.V2ServiceDefinition{}, maskAny(err)
 			}
 
 			var genericComponent map[string]interface{}
 			if err := json.Unmarshal(rawComponent, &genericComponent); err != nil {
-				return userconfig.V2AppDefinition{}, maskAny(err)
+				return userconfig.V2ServiceDefinition{}, maskAny(err)
 			}
 
 			genericNode := map[string]interface{}{}
@@ -191,12 +191,12 @@ func V1GiantSwarmToV2GiantSwarm(v1AppDef userconfig.AppDefinition) (userconfig.V
 
 	raw, err := json.Marshal(genericNodes)
 	if err != nil {
-		return userconfig.V2AppDefinition{}, maskAny(err)
+		return userconfig.V2ServiceDefinition{}, maskAny(err)
 	}
 
-	var v2AppDef userconfig.V2AppDefinition
+	var v2AppDef userconfig.V2ServiceDefinition
 	if err := json.Unmarshal(raw, &v2AppDef); err != nil {
-		return userconfig.V2AppDefinition{}, maskAny(err)
+		return userconfig.V2ServiceDefinition{}, maskAny(err)
 	}
 
 	return v2AppDef, nil

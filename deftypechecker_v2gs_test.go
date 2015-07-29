@@ -37,8 +37,8 @@ var _ = Describe("v2GiantSwarmDefTypeChecker", func() {
 				Expect(t).To(Equal(DefTypeV2GiantSwarm))
 			})
 
-			It("should parse probability of 66", func() {
-				Expect(prob).To(Equal(float64(66)))
+			It("should parse probability of 57", func() {
+				Expect(prob).To(Equal(float64(57)))
 			})
 		})
 
@@ -79,8 +79,8 @@ var _ = Describe("v2GiantSwarmDefTypeChecker", func() {
 				Expect(t).To(Equal(DefTypeV2GiantSwarm))
 			})
 
-			It("should parse probability of 66", func() {
-				Expect(prob).To(Equal(float64(66)))
+			It("should parse probability of 57", func() {
+				Expect(prob).To(Equal(float64(57)))
 			})
 		})
 
