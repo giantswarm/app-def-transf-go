@@ -141,8 +141,13 @@ func V1GiantSwarmToV2GiantSwarm(v1AppDef userconfig.AppDefinition) (userconfig.V
 					if rawDeps, ok := val.([]interface{}); ok {
 						for i, rawDep := range rawDeps {
 							if m, ok := rawDep.(map[string]interface{}); ok {
+								// Convert name to node
 								serviceName, componentName := userconfig.ParseDependency(service.ServiceName, m["name"].(string))
-								m["name"] = nodeNameMap[nameKey(serviceName, componentName)]
+								m["node"] = nodeNameMap[nameKey(serviceName, componentName)]
+								delete(m, "name")
+								// Convert port to target_port
+								m["target_port"] = m["port"]
+								delete(m, "port")
 								rawDeps[i] = m
 							}
 						}

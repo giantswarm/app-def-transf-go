@@ -20,6 +20,22 @@ func TestMigrateV1ToV2(t *testing.T) {
 						ComponentName: "component_name",
 						InstanceConfig: userconfig.InstanceConfig{
 							Image: generictypes.MustParseDockerImage("image"),
+							Dependencies: []userconfig.DependencyConfig{
+								userconfig.DependencyConfig{
+									Name:  "component_name2",
+									Port:  generictypes.MustParseDockerPort("80/tcp"),
+									Alias: "myalias",
+								},
+							},
+						},
+					},
+					userconfig.ComponentConfig{
+						ComponentName: "component_name2",
+						InstanceConfig: userconfig.InstanceConfig{
+							Image: generictypes.MustParseDockerImage("image"),
+							Ports: []generictypes.DockerPort{
+								generictypes.MustParseDockerPort("80/tcp"),
+							},
 						},
 					},
 				},
@@ -34,6 +50,24 @@ func TestMigrateV1ToV2(t *testing.T) {
 
 	if err := v2AppDef.Validate(nil); err != nil {
 		t.Fatalf("v2AppDef.Validate failed: %#v", err)
+	}
+
+	node, err := v2AppDef.Nodes.NodeByName("service_name/component_name")
+	if err != nil {
+		t.Fatalf("node service_name/component_name node found: %#v", err)
+	}
+
+	if len(node.Links) != 1 {
+		t.Fatalf("node.Links should contain 1 link, got %v", len(node.Links))
+	}
+	if !node.Links[0].Node.Equals("service_name/component_name2") {
+		t.Fatalf("node.Links[0].Node should be service_name/component_name2, got %s", node.Links[0].Node)
+	}
+	if !node.Links[0].TargetPort.Equals(generictypes.MustParseDockerPort("80/tcp")) {
+		t.Fatalf("node.Links[0].TargetPort should be 80/tcp, got %#v", node.Links[0].TargetPort)
+	}
+	if node.Links[0].Alias != "myalias" {
+		t.Fatalf("node.Links[0].Alias should be myalias, got %s", node.Links[0].Alias)
 	}
 }
 
