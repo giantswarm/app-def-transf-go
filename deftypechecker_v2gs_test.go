@@ -22,8 +22,8 @@ var _ = Describe("v2GiantSwarmDefTypeChecker", func() {
 		Describe("valid definition", func() {
 			BeforeEach(func() {
 				b := []byte(`{
-					"nodes": {
-						"node/name/foo": {
+					"components": {
+						"component/name/foo": {
 							"image": "fancy/image:latest",
 							"ports": [ 8080 ]
 						}
@@ -62,10 +62,10 @@ var _ = Describe("v2GiantSwarmDefTypeChecker", func() {
 
 		Describe("broken field names", func() {
 			BeforeEach(func() {
-				// wrong keys are "Nodes" and "portS"
+				// wrong keys are "Components" and "portS"
 				b := []byte(`{
-					"Nodes": {
-						"node/name/foo": {
+					"Components": {
+						"component/name/foo": {
 							"image": "fancy/image:latest",
 							"portS": [ 8080 ]
 						}
@@ -88,8 +88,8 @@ var _ = Describe("v2GiantSwarmDefTypeChecker", func() {
 			BeforeEach(func() {
 				// the first comma (,) is missing
 				b := []byte(`{
-					"nodes": {
-						"node/name/foo": {
+					"components": {
+						"component/name/foo": {
 							"image": "fancy/image:latest"
 							"ports": [ 8080 ]
 						}
@@ -111,8 +111,8 @@ var _ = Describe("v2GiantSwarmDefTypeChecker", func() {
 		Describe("unparsed variables", func() {
 			BeforeEach(func() {
 				b := []byte(`{
-					"nodes": {
-						"node/name/foo": {
+					"components": {
+						"component/name/foo": {
 							"image": "fancy/image:latest",
 							"ports": [ $port ]
 						}

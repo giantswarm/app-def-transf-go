@@ -72,49 +72,49 @@ func ParseName(b []byte) (string, error) {
 }
 
 func V1GiantSwarmToV2GiantSwarm(v1AppDef userconfig.AppDefinition) (userconfig.V2AppDefinition, error) {
-	genericNodes := map[string]map[string]interface{}{
-		"nodes": map[string]interface{}{},
+	genericComponents := map[string]map[string]interface{}{
+		"components": map[string]interface{}{},
 	}
 
 	nameKey := func(serviceName, componentName string) string {
 		return serviceName + "/" + componentName
 	}
 
-	// Create node names for each component
-	nodeNameMap := make(map[string]string)
+	// Create component names for each component
+	componentNameMap := make(map[string]string)
 	for _, service := range v1AppDef.Services {
 		for _, component := range service.Components {
-			var nodeName string
+			var componentName string
 			if component.PodName != "" {
-				nodeName = service.ServiceName + "/" + component.PodName + "/" + component.ComponentName
+				componentName = service.ServiceName + "/" + component.PodName + "/" + component.ComponentName
 			} else {
-				nodeName = service.ServiceName + "/" + component.ComponentName
+				componentName = service.ServiceName + "/" + component.ComponentName
 			}
 			key := nameKey(service.ServiceName, component.ComponentName)
-			nodeNameMap[key] = nodeName
+			componentNameMap[key] = componentName
 		}
 	}
 
-	// Create nodes for all components
+	// Create components for all components
 	podsCreated := make(map[string]string)
 	for _, service := range v1AppDef.Services {
 		for _, component := range service.Components {
 			key := nameKey(service.ServiceName, component.ComponentName)
-			nodeName := nodeNameMap[key]
+			componentName := componentNameMap[key]
 
-			// Create pod node if needed
+			// Create pod component if needed
 			if component.PodName != "" {
-				podNodeName := service.ServiceName + "/" + component.PodName
-				if _, ok := podsCreated[podNodeName]; !ok {
-					// Need to create pod node
-					podNode := map[string]interface{}{}
-					podNode["pod"] = "children"
+				podComponentName := service.ServiceName + "/" + component.PodName
+				if _, ok := podsCreated[podComponentName]; !ok {
+					// Need to create pod component
+					podComponent := map[string]interface{}{}
+					podComponent["pod"] = "children"
 
-					// Add pod node
-					genericNodes["nodes"][podNodeName] = podNode
+					// Add pod component
+					genericComponents["components"][podComponentName] = podComponent
 
-					// Record that we created this node so we don't duplicate t
-					podsCreated[podNodeName] = podNodeName
+					// Record that we created this component so we don't duplicate t
+					podsCreated[podComponentName] = podComponentName
 				}
 
 				// Remove the podname so it will not be part of the v2 def
@@ -126,13 +126,13 @@ func V1GiantSwarmToV2GiantSwarm(v1AppDef userconfig.AppDefinition) (userconfig.V
 				return userconfig.V2AppDefinition{}, maskAny(err)
 			}
 
-			var genericComponent map[string]interface{}
-			if err := json.Unmarshal(rawComponent, &genericComponent); err != nil {
+			var v1GenericComponent map[string]interface{}
+			if err := json.Unmarshal(rawComponent, &v1GenericComponent); err != nil {
 				return userconfig.V2AppDefinition{}, maskAny(err)
 			}
 
-			genericNode := map[string]interface{}{}
-			for key, val := range genericComponent {
+			genericComponent := map[string]interface{}{}
+			for key, val := range v1GenericComponent {
 				if key == "component_name" {
 					continue
 				}
@@ -141,9 +141,9 @@ func V1GiantSwarmToV2GiantSwarm(v1AppDef userconfig.AppDefinition) (userconfig.V
 					if rawDeps, ok := val.([]interface{}); ok {
 						for i, rawDep := range rawDeps {
 							if m, ok := rawDep.(map[string]interface{}); ok {
-								// Convert name to node
+								// Convert name to component
 								serviceName, componentName := userconfig.ParseDependency(service.ServiceName, m["name"].(string))
-								m["node"] = nodeNameMap[nameKey(serviceName, componentName)]
+								m["component"] = componentNameMap[nameKey(serviceName, componentName)]
 								delete(m, "name")
 								// Convert port to target_port
 								m["target_port"] = m["port"]
@@ -155,7 +155,7 @@ func V1GiantSwarmToV2GiantSwarm(v1AppDef userconfig.AppDefinition) (userconfig.V
 						val = rawDeps
 					}
 
-					genericNode["links"] = val
+					genericComponent["links"] = val
 					continue
 				}
 
@@ -165,11 +165,11 @@ func V1GiantSwarmToV2GiantSwarm(v1AppDef userconfig.AppDefinition) (userconfig.V
 							if m, ok := rawVol.(map[string]interface{}); ok {
 								if volumeFromRaw, ok := m["volume-from"]; ok {
 									serviceName, componentName := userconfig.ParseDependency(service.ServiceName, volumeFromRaw.(string))
-									m["volume-from"] = nodeNameMap[nameKey(serviceName, componentName)]
+									m["volume-from"] = componentNameMap[nameKey(serviceName, componentName)]
 								}
 								if volumesFromRaw, ok := m["volumes-from"]; ok {
 									serviceName, componentName := userconfig.ParseDependency(service.ServiceName, volumesFromRaw.(string))
-									m["volumes-from"] = nodeNameMap[nameKey(serviceName, componentName)]
+									m["volumes-from"] = componentNameMap[nameKey(serviceName, componentName)]
 								}
 								rawVols[i] = m
 							}
@@ -178,23 +178,23 @@ func V1GiantSwarmToV2GiantSwarm(v1AppDef userconfig.AppDefinition) (userconfig.V
 						val = rawVols
 					}
 
-					genericNode["volumes"] = val
+					genericComponent["volumes"] = val
 					continue
 				}
 
 				if key == "scaling_policy" {
-					genericNode["scale"] = val
+					genericComponent["scale"] = val
 					continue
 				}
 
-				genericNode[key] = val
+				genericComponent[key] = val
 			}
 
-			genericNodes["nodes"][nodeName] = genericNode
+			genericComponents["components"][componentName] = genericComponent
 		}
 	}
 
-	raw, err := json.Marshal(genericNodes)
+	raw, err := json.Marshal(genericComponents)
 	if err != nil {
 		return userconfig.V2AppDefinition{}, maskAny(err)
 	}
