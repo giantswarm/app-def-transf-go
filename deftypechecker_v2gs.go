@@ -12,7 +12,7 @@ import (
 
 // simple app definition
 
-type simpleV2GiantSwarmNodeDef struct {
+type simpleV2GiantSwarmComponentDef struct {
 	Image  string                    `json:"image"`
 	Ports  []generictypes.DockerPort `json:"ports"`
 	Expose map[string]interface{}    `json:"expose"`
@@ -20,8 +20,8 @@ type simpleV2GiantSwarmNodeDef struct {
 }
 
 type simpleV2GiantSwarmAppDef struct {
-	ServiceName string                               `json:"name,omitempty"`
-	Nodes       map[string]simpleV2GiantSwarmNodeDef `json:"nodes"`
+	ServiceName string                                    `json:"name,omitempty"`
+	Components  map[string]simpleV2GiantSwarmComponentDef `json:"components"`
 }
 
 // def type checker
@@ -37,12 +37,12 @@ func newV2GiantSwarmDefTypeChecker() defTypeChecker {
 
 	checker.checks = []v2GiantSwarmCheck{
 		checker.hasServiceName,
-		checker.hasNodes,
-		checker.hasNodeName,
+		checker.hasComponents,
+		checker.hasComponentName,
 		checker.hasComponentImage,
 		checker.hasComponentPorts,
-		checker.hasNodeExpose,
-		checker.hasNodeScale,
+		checker.hasComponentExpose,
+		checker.hasComponentScale,
 	}
 
 	return checker
@@ -54,7 +54,7 @@ func (dtc v2GiantSwarmDefTypeChecker) Parse(b []byte) (DefType, float64) {
 	// On syntax errors we need to check the raw definition. In case we find
 	// important keywords we just assume to have a higher probability to deal
 	// with a v2 app def.
-	match, err := regexp.Match(`"nodes"(\s+)?:`, b)
+	match, err := regexp.Match(`"components"(\s+)?:`, b)
 	if err != nil {
 		return DefTypeV2GiantSwarm, 0.0
 	} else if match {
@@ -93,49 +93,49 @@ func (dtc v2GiantSwarmDefTypeChecker) hasServiceName(simpleDef simpleV2GiantSwar
 	return simpleDef.ServiceName != ""
 }
 
-func (dtc v2GiantSwarmDefTypeChecker) hasNodes(simpleDef simpleV2GiantSwarmAppDef) bool {
-	return len(simpleDef.Nodes) > 0
+func (dtc v2GiantSwarmDefTypeChecker) hasComponents(simpleDef simpleV2GiantSwarmAppDef) bool {
+	return len(simpleDef.Components) > 0
 }
 
-func (dtc v2GiantSwarmDefTypeChecker) hasNodeName(simpleDef simpleV2GiantSwarmAppDef) bool {
-	return dtc.iterateNodes(simpleDef, func(name string, node simpleV2GiantSwarmNodeDef) bool {
+func (dtc v2GiantSwarmDefTypeChecker) hasComponentName(simpleDef simpleV2GiantSwarmAppDef) bool {
+	return dtc.iterateComponents(simpleDef, func(name string, component simpleV2GiantSwarmComponentDef) bool {
 		return name != ""
 	})
 }
 
 func (dtc v2GiantSwarmDefTypeChecker) hasComponentImage(simpleDef simpleV2GiantSwarmAppDef) bool {
-	return dtc.iterateNodes(simpleDef, func(name string, node simpleV2GiantSwarmNodeDef) bool {
-		return node.Image != ""
+	return dtc.iterateComponents(simpleDef, func(name string, component simpleV2GiantSwarmComponentDef) bool {
+		return component.Image != ""
 	})
 }
 
 func (dtc v2GiantSwarmDefTypeChecker) hasComponentPorts(simpleDef simpleV2GiantSwarmAppDef) bool {
-	return dtc.iterateNodes(simpleDef, func(name string, node simpleV2GiantSwarmNodeDef) bool {
-		return len(node.Ports) > 0
+	return dtc.iterateComponents(simpleDef, func(name string, component simpleV2GiantSwarmComponentDef) bool {
+		return len(component.Ports) > 0
 	})
 }
 
-func (dtc v2GiantSwarmDefTypeChecker) hasNodeExpose(simpleDef simpleV2GiantSwarmAppDef) bool {
-	return dtc.iterateNodes(simpleDef, func(name string, node simpleV2GiantSwarmNodeDef) bool {
-		return len(node.Expose) > 0
+func (dtc v2GiantSwarmDefTypeChecker) hasComponentExpose(simpleDef simpleV2GiantSwarmAppDef) bool {
+	return dtc.iterateComponents(simpleDef, func(name string, component simpleV2GiantSwarmComponentDef) bool {
+		return len(component.Expose) > 0
 	})
 }
 
-func (dtc v2GiantSwarmDefTypeChecker) hasNodeScale(simpleDef simpleV2GiantSwarmAppDef) bool {
-	return dtc.iterateNodes(simpleDef, func(name string, node simpleV2GiantSwarmNodeDef) bool {
-		return len(node.Scale) > 0
+func (dtc v2GiantSwarmDefTypeChecker) hasComponentScale(simpleDef simpleV2GiantSwarmAppDef) bool {
+	return dtc.iterateComponents(simpleDef, func(name string, component simpleV2GiantSwarmComponentDef) bool {
+		return len(component.Scale) > 0
 	})
 }
 
 // private helper
 
-func (dtc v2GiantSwarmDefTypeChecker) iterateNodes(simpleDef simpleV2GiantSwarmAppDef, cb func(name string, node simpleV2GiantSwarmNodeDef) bool) bool {
-	if !dtc.hasNodes(simpleDef) {
+func (dtc v2GiantSwarmDefTypeChecker) iterateComponents(simpleDef simpleV2GiantSwarmAppDef, cb func(name string, component simpleV2GiantSwarmComponentDef) bool) bool {
+	if !dtc.hasComponents(simpleDef) {
 		return false
 	}
 
-	for name, node := range simpleDef.Nodes {
-		return cb(name, node)
+	for name, component := range simpleDef.Components {
+		return cb(name, component)
 	}
 
 	return false

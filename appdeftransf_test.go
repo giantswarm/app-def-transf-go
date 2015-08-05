@@ -52,22 +52,22 @@ func TestMigrateV1ToV2(t *testing.T) {
 		t.Fatalf("v2AppDef.Validate failed: %#v", err)
 	}
 
-	node, err := v2AppDef.Nodes.NodeByName("service_name/component_name")
+	component, err := v2AppDef.Components.ComponentByName("service_name/component_name")
 	if err != nil {
-		t.Fatalf("node service_name/component_name node found: %#v", err)
+		t.Fatalf("component service_name/component_name component found: %#v", err)
 	}
 
-	if len(node.Links) != 1 {
-		t.Fatalf("node.Links should contain 1 link, got %v", len(node.Links))
+	if len(component.Links) != 1 {
+		t.Fatalf("component.Links should contain 1 link, got %v", len(component.Links))
 	}
-	if !node.Links[0].Node.Equals("service_name/component_name2") {
-		t.Fatalf("node.Links[0].Node should be service_name/component_name2, got %s", node.Links[0].Node)
+	if !component.Links[0].Component.Equals("service_name/component_name2") {
+		t.Fatalf("component.Links[0].Component should be service_name/component_name2, got %s", component.Links[0].Component)
 	}
-	if !node.Links[0].TargetPort.Equals(generictypes.MustParseDockerPort("80/tcp")) {
-		t.Fatalf("node.Links[0].TargetPort should be 80/tcp, got %#v", node.Links[0].TargetPort)
+	if !component.Links[0].TargetPort.Equals(generictypes.MustParseDockerPort("80/tcp")) {
+		t.Fatalf("component.Links[0].TargetPort should be 80/tcp, got %#v", component.Links[0].TargetPort)
 	}
-	if node.Links[0].Alias != "myalias" {
-		t.Fatalf("node.Links[0].Alias should be myalias, got %s", node.Links[0].Alias)
+	if component.Links[0].Alias != "myalias" {
+		t.Fatalf("component.Links[0].Alias should be myalias, got %s", component.Links[0].Alias)
 	}
 }
 
@@ -258,8 +258,8 @@ var _ = Describe("AppDefTransf", func() {
 			Describe("valid", func() {
 				BeforeEach(func() {
 					b := []byte(`{
-						"nodes": {
-							"node/name/foo": {
+						"components": {
+							"component/name/foo": {
 								"image": "fancy/image:latest",
 								"ports": [ 8080 ]
 							}
@@ -280,10 +280,10 @@ var _ = Describe("AppDefTransf", func() {
 
 			Describe("broken field names", func() {
 				BeforeEach(func() {
-					// wrong keys are "Nodes" and "portS"
+					// wrong keys are "Components" and "portS"
 					b := []byte(`{
-						"Nodes": {
-							"node/name/foo": {
+						"Components": {
+							"component/name/foo": {
 								"image": "fancy/image:latest",
 								"portS": [ 8080 ]
 							}
@@ -306,8 +306,8 @@ var _ = Describe("AppDefTransf", func() {
 				BeforeEach(func() {
 					// the first comma (,) is missing
 					b := []byte(`{
-						"nodes": {
-							"node/name/foo": {
+						"components": {
+							"component/name/foo": {
 								"image": "fancy/image:latest"
 								"ports": [ 8080 ]
 							}
@@ -329,8 +329,8 @@ var _ = Describe("AppDefTransf", func() {
 			Describe("unparsed variables", func() {
 				BeforeEach(func() {
 					b := []byte(`{
-						"nodes": {
-							"node/name/foo": {
+						"components": {
+							"component/name/foo": {
 								"image": "fancy/image:latest",
 								"ports": [ $port ]
 							}
@@ -384,8 +384,8 @@ var _ = Describe("AppDefTransf", func() {
 			Describe("valid", func() {
 				BeforeEach(func() {
 					b := []byte(`{
-						"nodes": {
-							"node/name/foo": {
+						"components": {
+							"component/name/foo": {
 								"image": "fancy/image:latest",
 								"ports": [ 8080 ]
 							}
@@ -400,7 +400,7 @@ var _ = Describe("AppDefTransf", func() {
 				})
 
 				It("should parse name", func() {
-					Expect(n).To(Equal("63c100fb"))
+					Expect(n).To(Equal("8b75c8d7"))
 				})
 			})
 		})
