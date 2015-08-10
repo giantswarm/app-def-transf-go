@@ -2,7 +2,11 @@ package appdeftransf
 
 import (
 	"encoding/json"
+	"fmt"
+	"strconv"
+	"strings"
 
+	"github.com/giantswarm/generic-types-go"
 	"github.com/giantswarm/user-config"
 	"github.com/juju/errgo"
 )
@@ -82,7 +86,13 @@ func V1GiantSwarmToV2GiantSwarm(v1AppDef userconfig.AppDefinition) (userconfig.V
 
 	// Create component names for each component
 	componentNameMap := make(map[string]string)
+	portSequence := 8000
+	portMap := map[string]string{}
+	exposeMap := map[string]userconfig.ExposeDefinitions{}
+
 	for _, service := range v1AppDef.Services {
+		eds := userconfig.ExposeDefinitions{}
+
 		for _, component := range service.Components {
 			var componentName string
 			if component.PodName != "" {
@@ -92,7 +102,23 @@ func V1GiantSwarmToV2GiantSwarm(v1AppDef userconfig.AppDefinition) (userconfig.V
 			}
 			key := nameKey(service.ServiceName, component.ComponentName)
 			componentNameMap[key] = componentName
+
+			for _, port := range component.Ports {
+				portSequence++
+				portMap[componentName] = strconv.Itoa(portSequence) + "/tcp"
+				fmt.Printf("%#v\n", portMap)
+
+				ed := userconfig.ExposeDefinition{
+					TargetPort: port,
+					Port:       generictypes.MustParseDockerPort(strconv.Itoa(portSequence)),
+					Component:  userconfig.ComponentName(componentName),
+				}
+
+				eds = append(eds, ed)
+			}
 		}
+
+		exposeMap[service.ServiceName] = eds
 	}
 
 	// Create components for all components
@@ -143,10 +169,14 @@ func V1GiantSwarmToV2GiantSwarm(v1AppDef userconfig.AppDefinition) (userconfig.V
 							if m, ok := rawDep.(map[string]interface{}); ok {
 								// Convert name to component
 								serviceName, componentName := userconfig.ParseDependency(service.ServiceName, m["name"].(string))
-								m["component"] = componentNameMap[nameKey(serviceName, componentName)]
+								depName := componentNameMap[nameKey(serviceName, componentName)]
+								m["component"] = strings.Split(depName, "/")[0]
 								delete(m, "name")
 								// Convert port to target_port
-								m["target_port"] = m["port"]
+								fmt.Printf("%#v\n", depName)
+								fmt.Printf("%#v\n", portMap)
+								fmt.Printf("%#v\n", portMap[depName])
+								m["target_port"] = portMap[depName]
 								delete(m, "port")
 								rawDeps[i] = m
 							}
@@ -192,12 +222,19 @@ func V1GiantSwarmToV2GiantSwarm(v1AppDef userconfig.AppDefinition) (userconfig.V
 
 			genericComponents["components"][componentName] = genericComponent
 		}
+
+		if len(exposeMap[service.ServiceName]) > 0 {
+			genericComponents["components"][service.ServiceName] = map[string]interface{}{
+				"expose": exposeMap[service.ServiceName],
+			}
+		}
 	}
 
 	raw, err := json.Marshal(genericComponents)
 	if err != nil {
 		return userconfig.V2AppDefinition{}, maskAny(err)
 	}
+	fmt.Printf("%s\n", raw)
 
 	var v2AppDef userconfig.V2AppDefinition
 	if err := json.Unmarshal(raw, &v2AppDef); err != nil {
