@@ -235,5 +235,7 @@ func V1GiantSwarmToV2GiantSwarm(v1AppDef userconfig.AppDefinition) (userconfig.V
 		return userconfig.V2AppDefinition{}, maskAny(err)
 	}
 
+	v2AppDef.AppName = userconfig.AppName(v1AppDef.AppName)
+
 	return v2AppDef, nil
 }

@@ -57,6 +57,12 @@ func TestMigrateV1ToV2(t *testing.T) {
 		t.Fatalf("v2AppDef.Validate failed: %#v", err)
 	}
 
+	if name, err := v2AppDef.Name(); err != nil {
+		t.Fatalf("v2AppDef.Name failed: %#v", err)
+	} else if name != v1AppDef.AppName {
+		t.Fatalf("app name expected to be '%s', got '%s'", v1AppDef.AppName, name)
+	}
+
 	component, err := v2AppDef.Components.ComponentByName("service_name/component_name")
 	if err != nil {
 		t.Fatalf("component service_name/component_name component found: %#v", err)
