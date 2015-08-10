@@ -2,7 +2,6 @@ package appdeftransf
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -106,7 +105,6 @@ func V1GiantSwarmToV2GiantSwarm(v1AppDef userconfig.AppDefinition) (userconfig.V
 			for _, port := range component.Ports {
 				portSequence++
 				portMap[componentName] = strconv.Itoa(portSequence) + "/tcp"
-				fmt.Printf("%#v\n", portMap)
 
 				ed := userconfig.ExposeDefinition{
 					TargetPort: port,
@@ -173,9 +171,6 @@ func V1GiantSwarmToV2GiantSwarm(v1AppDef userconfig.AppDefinition) (userconfig.V
 								m["component"] = strings.Split(depName, "/")[0]
 								delete(m, "name")
 								// Convert port to target_port
-								fmt.Printf("%#v\n", depName)
-								fmt.Printf("%#v\n", portMap)
-								fmt.Printf("%#v\n", portMap[depName])
 								m["target_port"] = portMap[depName]
 								delete(m, "port")
 								rawDeps[i] = m
@@ -234,7 +229,6 @@ func V1GiantSwarmToV2GiantSwarm(v1AppDef userconfig.AppDefinition) (userconfig.V
 	if err != nil {
 		return userconfig.V2AppDefinition{}, maskAny(err)
 	}
-	fmt.Printf("%s\n", raw)
 
 	var v2AppDef userconfig.V2AppDefinition
 	if err := json.Unmarshal(raw, &v2AppDef); err != nil {
