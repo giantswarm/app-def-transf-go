@@ -17,9 +17,36 @@ func TestMigrateV1ToV2(t *testing.T) {
 				ServiceName: "service_name",
 				Components: []userconfig.ComponentConfig{
 					userconfig.ComponentConfig{
+						ComponentName: "component_name2",
+						InstanceConfig: userconfig.InstanceConfig{
+							Image: generictypes.MustParseDockerImage("image"),
+							Ports: []generictypes.DockerPort{generictypes.MustParseDockerPort("80/tcp")},
+							Dependencies: []userconfig.DependencyConfig{
+								userconfig.DependencyConfig{
+									Name:  "component_name3",
+									Port:  generictypes.MustParseDockerPort("80/tcp"),
+									Alias: "myalias",
+								},
+								userconfig.DependencyConfig{
+									Name:  "component_name",
+									Port:  generictypes.MustParseDockerPort("80/tcp"),
+									Alias: "myalias",
+								},
+							},
+						},
+					},
+					userconfig.ComponentConfig{
+						ComponentName: "component_name3",
+						InstanceConfig: userconfig.InstanceConfig{
+							Image: generictypes.MustParseDockerImage("image"),
+							Ports: []generictypes.DockerPort{generictypes.MustParseDockerPort("80/tcp")},
+						},
+					},
+					userconfig.ComponentConfig{
 						ComponentName: "component_name",
 						InstanceConfig: userconfig.InstanceConfig{
 							Image: generictypes.MustParseDockerImage("image"),
+							Ports: []generictypes.DockerPort{generictypes.MustParseDockerPort("80/tcp")},
 							Dependencies: []userconfig.DependencyConfig{
 								userconfig.DependencyConfig{
 									Name:  "service_name2/component_name2",
@@ -38,9 +65,7 @@ func TestMigrateV1ToV2(t *testing.T) {
 						ComponentName: "component_name2",
 						InstanceConfig: userconfig.InstanceConfig{
 							Image: generictypes.MustParseDockerImage("image"),
-							Ports: []generictypes.DockerPort{
-								generictypes.MustParseDockerPort("80/tcp"),
-							},
+							Ports: []generictypes.DockerPort{generictypes.MustParseDockerPort("80/tcp")},
 						},
 					},
 				},
@@ -74,8 +99,8 @@ func TestMigrateV1ToV2(t *testing.T) {
 	if !component.Links[0].Component.Equals("service_name2") {
 		t.Fatalf("component.Links[0].Component should be service_name2, got %s", component.Links[0].Component)
 	}
-	if !component.Links[0].TargetPort.Equals(generictypes.MustParseDockerPort("8001/tcp")) {
-		t.Fatalf("component.Links[0].TargetPort should be 8001/tcp, got %#v", component.Links[0].TargetPort)
+	if !component.Links[0].TargetPort.Equals(generictypes.MustParseDockerPort("8004/tcp")) {
+		t.Fatalf("component.Links[0].TargetPort should be 8004/tcp, got %#v", component.Links[0].TargetPort)
 	}
 	if component.Links[0].Alias != "myalias" {
 		t.Fatalf("component.Links[0].Alias should be myalias, got %s", component.Links[0].Alias)
