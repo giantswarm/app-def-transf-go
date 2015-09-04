@@ -25,7 +25,7 @@ func TestMigrateV1ToV2(t *testing.T) {
 								userconfig.DependencyConfig{
 									Name:  "component_name3",
 									Port:  generictypes.MustParseDockerPort("80/tcp"),
-									Alias: "myalias",
+									Alias: "myalias3",
 								},
 								userconfig.DependencyConfig{
 									Name:  "component_name",
