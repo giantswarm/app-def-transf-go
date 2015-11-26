@@ -49,12 +49,12 @@ func ParseName(b []byte) (string, error) {
 
 	switch t {
 	case DefTypeV2GiantSwarm:
-		appName, err := userconfig.V2AppName(b)
+		serviceName, err := userconfig.ParseServiceName(b)
 		if err != nil {
 			return "", maskAny(err)
 		}
 
-		return appName, nil
+		return serviceName, nil
 	}
 
 	return "", maskAny(errgo.WithCausef(nil, InvalidDefTypeErr, "expecting %s", DefTypeV2GiantSwarm))
